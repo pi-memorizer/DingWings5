@@ -118,7 +118,7 @@ void sLighting(Player *p, float ambientR, float ambientG, float ambientB, List<L
 		{
 			light[6 * i] = lights[i].x;
 			light[6 * i + 1] = lights[i].y;
-			light[6 * i + 2] = lights[i].radius*(rand() / (float)RAND_MAX*.05F + .995F);
+			light[6 * i + 2] = lights[i].radius*(rand() / (float)RAND_MAX*lights[i].flicker + (1-lights[i].flicker));
 			light[6 * i + 3] = lights[i].r;
 			light[6 * i + 4] = lights[i].g;
 			light[6 * i + 5] = lights[i].b;

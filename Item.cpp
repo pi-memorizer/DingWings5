@@ -1,7 +1,19 @@
 #include "Item.h"
 
 Hashmap<string, Item*> items;
-Stack<Item*> itemPools[4];
+List<Item*> itemPools[4];
+Item* chosenParts[5];
+PackageDeal packages[5];
+PackageDeal heldItem;
+Item* childrenChoices[4] = { nullptr };
+
+int PackageDeal::numStuff()
+{
+	int num = 0;
+	if (this->wrapping != nullptr) num++;
+	for (int i = 0; i < 5; i++) if (this->parts[i] != nullptr) num++;
+	return num;
+}
 
 Item::Item(int t)
 {
@@ -11,6 +23,12 @@ Item::Item(int t)
 Item* Item::_sprite(Sprite *s)
 {
 	sprite = s;
+	return this;
+}
+
+Item* Item::_sprite2(Sprite *s)
+{
+	sprite2 = s;
 	return this;
 }
 

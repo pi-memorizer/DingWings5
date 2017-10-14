@@ -6,7 +6,7 @@ class Player;
 class Light
 {
 public:
-	float x, y, radius, r, g, b;
+	float x, y, radius, r, g, b, flicker = .05F;
 	Light(float x, float y, float radius, float r = 1.0, float g = 1.0, float b = 1.0);
 	Light();
 };

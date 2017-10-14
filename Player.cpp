@@ -84,16 +84,20 @@ void removePlayer(int id)
 Player::Player(int id) : Entity(nullptr,-0,0)
 {
 	this->id = id;
-	x = -64;
-	y = -64;
+	x = 64;
+	y = 64;
 	worldID = 0;
-	width = 16;
-	height = 16;
+	width = 32;
+	height = 8;
 	texture = createTexture(WIDTH, HEIGHT);
 	pushState(new StartState(this));
 	cameraLocked = false;
-	cameraX = 0;
-	cameraY = 64;
+	cameraX = (WIDTH-TILE_SIZE)/2;
+	cameraY = (HEIGHT-TILE_SIZE)/2;
+	if (id != 0)
+	{
+		building = false;
+	}
 }
 
 Player::~Player()
@@ -142,15 +146,48 @@ void Player::setState(GameState *state)
 
 Sprite *Player::getSprite()
 {
-	int i = dir;
-	if ((wait / 10) % 2 == 1) i += 4;
-	if ((dir == 1 || dir == 3) && (wait / 10) % 4 == 3) i += 4;
+	int i = 0;
+	if (dir == 0) i = 3;
+	if (dir == 1) i = 9;
+	if (dir == 2) i = 6;
+	if ((wait / 10) % 4 == 1) i += 1;
+	if ((wait / 10) % 4 == 3) i += 2;
+	assert(i < 12&&i>=0);
 	return guy[i];
 }
 
 void Player::draw(int x, int y)
 {
-	getSprite()->draw(x, y);
+	if (building) { 
+		getSprite()->draw(x, y);
+		if (heldItem.numStuff() != 0) {
+			if (heldItem.numStuff() == 1)
+			{
+				heldItem.wrapping->sprite->draw(x, y - 24);
+			}
+			else if (heldItem.numStuff() < 6) {
+				int index = -1;
+				for (int i = 0; i < 5; i++) if (heldItem.parts[i]->type == ITEM_BODY) index = i;
+				if (index != -1)
+				{
+					heldItem.parts[index]->sprite2->draw(x, y - 24);
+				}
+			} else {
+				heldItem.wrapping->sprite2->draw(x, y - 24);
+			}
+		}
+	}
+	else {
+		if (this->y == 2)
+		{
+			if(this->x == 1)
+			getSprite()->draw(WIDTH - TILE_SIZE, HEIGHT - 2*TILE_SIZE);
+			else getSprite()->draw(WIDTH / 2, HEIGHT - 2 * TILE_SIZE);
+		}
+		else {
+			getSprite()->draw(TILE_SIZE*(8 + 6 * this->x), TILE_SIZE * (1 + 6 * this->y));
+		}
+	}
 }
 
 void Player::run()

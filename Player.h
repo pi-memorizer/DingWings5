@@ -51,7 +51,6 @@ public:
 	void unlockCamera(); //makes it so the camera can be controlled programmatically
 	int getCameraCenterX();
 	int getCameraCenterY();
-	Item * heldItem = nullptr;
 	bool building = true;
 };
 

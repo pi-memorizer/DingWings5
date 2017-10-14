@@ -118,7 +118,6 @@ int StaticWorld::getLower(int x, int y)
 	if (x >= xOffset&&y >= yOffset&&x < xOffset + width&&y < yOffset + height)
 	{
 		int v = map[(x - xOffset) + (y - yOffset)*width].lower;
-		if (v != 0) debug(v);
 		return v;
 	}
 	else return 0;

@@ -11,6 +11,7 @@
 #define ITEM_MOUTH 3
 #define ITEM_ACCESSORY 4
 #define ITEM_BODY 5
+#define ITEM_WRAPPING 6
 
 ///////////////////////////////////////////////////////
 //IMPORTANT IDEA                                     //
@@ -30,9 +31,11 @@ class Item
 {
 public:
 	Sprite *sprite = nullptr;
+	Sprite *sprite2 = nullptr;
 	int type;
 	Item(int t);
 	Item* _sprite(Sprite *sprite);
+	Item *_sprite2(Sprite *sprite);
 };
 
 //a map of all the items in use
@@ -44,8 +47,22 @@ extern Hashmap<string, Item*> items;
 //creates an item given a certain name and adds it to the item list
 Item* addItem(string name, int type);
 
-extern Stack<Item*> itemPools[4];
+extern List<Item*> itemPools[4];
 
 void fillPool(int type);
+
+extern Item* chosenParts[5];
+
+struct PackageDeal
+{
+	Item* parts[5] = { nullptr };
+	Item* wrapping = nullptr;
+	int numStuff();
+};
+
+extern PackageDeal packages[5];
+extern PackageDeal heldItem;
+
+extern Item* childrenChoices[4];
 
 #endif

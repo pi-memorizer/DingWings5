@@ -615,6 +615,37 @@ void postProcess(Player *p)
 	p->texture = temp;
 }
 
+void sDefault();
+
+void postProcess(Player *p, int x, int y, int width, int height)
+{
+	if (postBuffer->width != p->texture->width || postBuffer->height != p->texture->height)
+	{
+		delete postBuffer;
+		postBuffer = createTexture(p->texture->width, p->texture->height);
+	}
+	int s = lastShader;
+	sDefault();
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, postBuffer->texture, 0);
+	glViewport(0, 0, postBuffer->width, postBuffer->height);
+	Rect r;
+	r.x = -paddingX;
+	r.y = 0;
+	r.w = postBuffer->width;
+	r.h = postBuffer->height;
+	drawTexture(p->texture, &r);
+	changeShader(s);
+	r.x = x;
+	r.y = y;
+	r.w = width;
+	r.h = height;
+	drawTexture(p->texture, &r, &r);
+	Texture *temp = postBuffer;
+	postBuffer = p->texture;
+	p->texture = temp;
+}
+
 void drawTexture(Texture *texture, Rect *rect)
 {
 	Rect s;
@@ -942,13 +973,13 @@ int startGame()
 		joysticks.add(SDL_JoystickOpen(i));
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	for (int i = SDLK_a; i <= SDLK_z; i++)
-		keys.add(i, false);
+	//for (int i = SDLK_a; i <= SDLK_z; i++)
+		//keys.add(i, false);
 	keys.add(SDLK_F4, false);
 	keys.add(SDLK_F11, false);
-	keys.add(SDLK_LSHIFT, false);
-	keys.add(SDLK_RSHIFT, false);
-	keys.add(SDLK_SPACE, false);
+	//keys.add(SDLK_LSHIFT, false);
+	//keys.add(SDLK_RSHIFT, false);
+	//keys.add(SDLK_SPACE, false);
 	keys.add(SDLK_ESCAPE, false);
 	playerMap[0].playing = true;
 #ifndef REVENGINE_GL
@@ -1216,6 +1247,15 @@ bool getEvent(Event *e)
 		}
 		else if (sdl.type == SDL_JOYAXISMOTION)
 		{
+			int dZone = JOYSTICK_DEAD_ZONE;
+			if (players[0]->building)
+			{
+				if (sdl.jaxis.which == 1) dZone = 3 * dZone / 2;
+			}
+			else {
+				if (sdl.jaxis.which == 0) dZone = 3 * dZone / 2;
+			}
+			e->type = EVENT_CONTROLLER;
 			if (sdl.jaxis.which < MAX_PLAYERS)
 			{
 				if (!playerMap[sdl.jaxis.which].playing)
@@ -1225,12 +1265,12 @@ bool getEvent(Event *e)
 				}
 				if (sdl.jaxis.axis == 0)
 				{
-					if (sdl.jaxis.value < -JOYSTICK_DEAD_ZONE)
+					if (sdl.jaxis.value < -dZone)
 					{
 						playerMap[sdl.jaxis.which].left = true;
 						playerMap[sdl.jaxis.which].right = false;
 					}
-					else if (sdl.jaxis.value > JOYSTICK_DEAD_ZONE)
+					else if (sdl.jaxis.value > dZone)
 					{
 						playerMap[sdl.jaxis.which].right = true;
 						playerMap[sdl.jaxis.which].left = false;
@@ -1240,13 +1280,13 @@ bool getEvent(Event *e)
 						playerMap[sdl.jaxis.which].left = false;
 					}
 				}
-				else {
-					if (sdl.jaxis.value < -JOYSTICK_DEAD_ZONE)
+				else if(sdl.jaxis.axis==1){
+					if (sdl.jaxis.value < -dZone)
 					{
 						playerMap[sdl.jaxis.which].up = true;
 						playerMap[sdl.jaxis.which].down = false;
 					}
-					else if (sdl.jaxis.value > JOYSTICK_DEAD_ZONE)
+					else if (sdl.jaxis.value > dZone)
 					{
 						playerMap[sdl.jaxis.which].down = true;
 						playerMap[sdl.jaxis.which].up = false;
@@ -1260,6 +1300,7 @@ bool getEvent(Event *e)
 		}
 		else if (sdl.type == SDL_JOYBUTTONDOWN)
 		{
+			e->type = EVENT_CONTROLLER;
 			if (sdl.jbutton.which < MAX_PLAYERS)
 			{
 				if (!playerMap[sdl.jaxis.which].playing)
@@ -1278,6 +1319,7 @@ bool getEvent(Event *e)
 		}
 		else if (sdl.type == SDL_JOYBUTTONUP)
 		{
+			e->type = EVENT_CONTROLLER;
 			if (sdl.jbutton.which < MAX_PLAYERS)
 			{
 				if (sdl.jbutton.button % 2 == 0)
@@ -1289,8 +1331,9 @@ bool getEvent(Event *e)
 				}
 			}
 		}
-		else if (sdl.type == SDL_JOYHATMOTION)
+		/*else if (sdl.type == SDL_JOYHATMOTION)
 		{
+			e->type = EVENT_CONTROLLER;
 			if (sdl.jhat.which < MAX_PLAYERS)
 			{
 				if (!playerMap[sdl.jaxis.which].playing)
@@ -1303,6 +1346,10 @@ bool getEvent(Event *e)
 				playerMap[sdl.jhat.which].left = sdl.jhat.value&8;
 				playerMap[sdl.jhat.which].right = sdl.jhat.value&2;
 			}
+		}*/
+		else if (sdl.type == SDL_CONTROLLERAXISMOTION)
+		{
+			debug("Welp");
 		}
 		else {
 			e->type = EVENT_UNKNOWN;

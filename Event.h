@@ -5,7 +5,7 @@
 
 //Used in the event handling system
 
-enum EventType { EVENT_QUIT, EVENT_KEY_DOWN, EVENT_KEY_UP, EVENT_UNKNOWN };
+enum EventType { EVENT_QUIT, EVENT_KEY_DOWN, EVENT_KEY_UP, EVENT_UNKNOWN, EVENT_CONTROLLER };
 enum EventKey {
 	KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_UNKNOWN
 };

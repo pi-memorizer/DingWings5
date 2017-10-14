@@ -137,6 +137,9 @@ public:
 	void add(T val);
 	T remove(T value);
 	T removeAt(int index);
+	T peek();
+	T pop();
+	void push(T val);
 };
 
 template<class T> List<T>::List()
@@ -254,6 +257,19 @@ template<class T> T List<T>::removeAt(int index)
 	}
 	top--;
 	return val;
+}
+
+template<class T> T List<T>::peek()
+{
+	return back[0];
+}
+template<class T> T List<T>::pop()
+{
+	return removeAt(0);
+}
+template<class T> void List<T>::push(T val)
+{
+	add(val);
 }
 
 namespace Hashing

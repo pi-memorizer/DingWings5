@@ -27,5 +27,6 @@ void getTextureSize(Texture *texture, int *w, int *h); //gets the dimensions of 
 void destroyTexture(Texture *texture); //removes a texture from memory
 void drawCharacter(unsigned char c, int x, int y, int r, int g, int b); //draws a character with a given color and coordinate from the bitmap font
 int getPaddingX();
+void postProcess(Player *p, int x, int y, int width, int height);
 
 #endif
