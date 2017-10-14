@@ -29,4 +29,37 @@ public:
 	virtual void run();
 };
 
+class StartState : public GameState
+{
+public:
+	StartState(Player *player);
+	virtual void draw();
+	virtual void run();
+};
+
+class LoseState : public GameState
+{
+public:
+	LoseState(Player *player);
+	virtual void draw();
+	virtual void run();
+};
+
+class WinState : public GameState
+{
+public:
+	WinState(Player *player);
+	virtual void draw();
+	virtual void run();
+};
+
+class SwitchState : public GameState
+{
+public:
+	int time = 0;
+	SwitchState(Player *player);
+	virtual void draw();
+	virtual void run();
+};
+
 #endif

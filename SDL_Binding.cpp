@@ -1114,7 +1114,7 @@ void writeString(File * file, string v)
 
 //Key press related stuff
 
-void switchKey(int k, bool state)
+/*void switchKey(int k, bool state)
 {
 	switch (k)
 	{
@@ -1156,7 +1156,7 @@ void switchKey(int k, bool state)
 	default:
 		break;
 	}
-}
+}*/
 
 bool getEvent(Event *e)
 {
@@ -1193,7 +1193,7 @@ bool getEvent(Event *e)
 				{
 					e->type = EVENT_QUIT;
 				} else {
-					switchKey(sdl.key.keysym.sym, true);
+					//switchKey(sdl.key.keysym.sym, true);
 				}
 				keys[sdl.key.keysym.sym] = true;
 				e->keys.key = KEY_UNKNOWN;
@@ -1208,7 +1208,7 @@ bool getEvent(Event *e)
 			{
 				keys[sdl.key.keysym.sym] = false;
 				e->keys.key = KEY_UNKNOWN;
-				switchKey(sdl.key.keysym.sym, false);
+				//switchKey(sdl.key.keysym.sym, false);
 			}
 			else {
 				e->keys.key = KEY_UNKNOWN;
@@ -1332,14 +1332,6 @@ bool getKey(Player *p, EventKey key)
 		return m->left;
 	case KEY_RIGHT:
 		return m->right;
-	case KEY_UP2:
-		return m->up2;
-	case KEY_DOWN2:
-		return m->down2;
-	case KEY_LEFT2:
-		return m->left2;
-	case KEY_RIGHT2:
-		return m->right2;
 	default:
 		break;
 	}

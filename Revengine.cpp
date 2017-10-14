@@ -67,7 +67,8 @@ bool theLoop()
 	}
 	for (int i = 0; i < numPlayers; i++)
 	{
-		players[i]->getState()->run();
+		if(i==0||inPlayState)
+			players[i]->getState()->run();
 	}
 
 	prevDelay = delay(16);

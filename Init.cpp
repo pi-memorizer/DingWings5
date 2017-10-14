@@ -40,6 +40,17 @@ void enterNothing(Player *p)
 {
 }
 
+void checkPools()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		if (itemPools[i].length() == 0)
+		{
+			fillPool(i + 1);
+		}
+	}
+}
+
 void testWorldLighting(Player *p)
 {
 	List<Light> lights;
@@ -51,7 +62,6 @@ void testWorldLighting(Player *p)
 void init()
 {
 	createSound("door");
-
 	//load sprites
 	Sprite *guySheet = new Sprite("guy", 0, 0);
 	guy = new Sprite*[12];
@@ -78,7 +88,7 @@ void init()
 	}
 
 	//add entities to worlds and stuff here preferably
-	World *test = new StaticWorld("test", &enterNothing,&nothing, &testWorldLighting,&nothing);
+	World *test = new StaticWorld("test", &enterNothing,&checkPools, &testWorldLighting,&nothing);
 	worlds.add(test);
 	//Entity *testEntity = new Entity(test, -4, 9, 32, 32, nullptr, &nothing, &nothing);
 	//test->addEntity(testEntity);

@@ -5,11 +5,12 @@
 //Holds data about items
 
 //The different Item categories, expressed with values that are exponents of two (bit flags)
+
 #define ITEM_EYE 1
-#define ITEM_BODY 2
-#define ITEM_LIMB 3
-#define ITEM_MOUTH 4
-#define ITEM_ACCESSORY 5
+#define ITEM_LIMB 2
+#define ITEM_MOUTH 3
+#define ITEM_ACCESSORY 4
+#define ITEM_BODY 5
 
 ///////////////////////////////////////////////////////
 //IMPORTANT IDEA                                     //
@@ -42,5 +43,9 @@ extern Hashmap<string, Item*> items;
 
 //creates an item given a certain name and adds it to the item list
 Item* addItem(string name, int type);
+
+extern Stack<Item*> itemPools[4];
+
+void fillPool(int type);
 
 #endif

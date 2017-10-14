@@ -8,6 +8,7 @@
 Player **players = new Player*[0];
 int numPlayers = 0;
 Sprite **guy = nullptr;
+bool inPlayState = false;
 
 Player *getPlayer(int id)
 {
@@ -89,7 +90,7 @@ Player::Player(int id) : Entity(nullptr,-0,0)
 	width = 16;
 	height = 16;
 	texture = createTexture(WIDTH, HEIGHT);
-	pushState(new WorldState(this));
+	pushState(new StartState(this));
 	cameraLocked = false;
 	cameraX = 0;
 	cameraY = 64;

@@ -244,3 +244,94 @@ void WorldState::run()
 	}
 	endMenu();
 }
+
+StartState::StartState(Player *player) : GameState(player)
+{
+
+}
+void StartState::draw()
+{
+
+}
+void StartState::run()
+{
+	int down = 0;
+	for (int i = 0; i < numPlayers; i++)
+	{
+		if (getKey(players[i], KEY_A))
+			down++;
+	}
+	if (down == 2)
+	{
+		inPlayState = true;
+		p->setState(new WorldState(p));
+		return;
+	}
+}
+
+WinState::WinState(Player *player) : GameState(player)
+{
+	inPlayState = false;
+}
+void WinState::draw()
+{
+
+}
+void WinState::run()
+{
+	int down = 0;
+	for (int i = 0; i < numPlayers; i++)
+	{
+		if (getKey(players[i], KEY_A))
+			down++;
+	}
+	if (down == 2)
+	{
+		p->setState(new StartState(p));
+		return;
+	}
+}
+
+LoseState::LoseState(Player *player) : GameState(player)
+{
+	inPlayState = false;
+}
+void LoseState::draw()
+{
+
+}
+void LoseState::run()
+{
+	int down = 0;
+	for (int i = 0; i < numPlayers; i++)
+	{
+		if (getKey(players[i], KEY_A))
+			down++;
+	}
+	if (down == 2)
+	{
+		p->setState(new StartState(p));
+		return;
+	}
+}
+
+SwitchState::SwitchState(Player *player) : GameState(player)
+{
+	inPlayState = false;
+}
+void SwitchState::draw()
+{
+
+}
+void SwitchState::run()
+{
+	if (time == 60)
+	{
+		inPlayState = true;
+		p->popState();
+		return;
+	}
+	else {
+		time++;
+	}
+}

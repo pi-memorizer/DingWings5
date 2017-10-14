@@ -11,6 +11,8 @@
 
 extern Sprite ** guy; //the current spritesheet for the main character
 
+extern bool inPlayState;
+
 struct ItemNumberPair //holds items with their quantities, for use mainly in inventories
 {
 	Item *item;
