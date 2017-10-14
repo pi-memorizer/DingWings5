@@ -8,6 +8,9 @@
 #include "Revengine.h"
 #include "Shader.h"
 
+#define MAX_TIME_LEFT 3600;
+int timeLeft = MAX_TIME_LEFT;
+
 GameState::GameState(Player *player)
 {
 	p = player;
@@ -36,7 +39,7 @@ void GameState::endMenu()
 
 WorldState::WorldState(Player *player) : GameState(player)
 {
-
+	if(player->id==0) timeLeft = MAX_TIME_LEFT;
 }
 
 void WorldState::draw()
@@ -109,6 +112,23 @@ bool firstWithWorldId(int worldId, int playerId)
 
 void WorldState::run()
 {
+	if (p->id == 0)
+	{
+		timeLeft--;
+		if (timeLeft == 0)
+		{
+			bool lose = false;
+			if (lose)
+			{
+				p->setState(new LoseState(p));
+				return;
+			}
+			else {
+				p->setState(new WinState(p));
+				return;
+			}
+		}
+	}
 	for (int i = 0; i < animations.length(); i++)
 	{
 		if (animations[i]->isDone())
@@ -287,7 +307,7 @@ void WinState::run()
 	}
 	if (down == 2)
 	{
-		p->setState(new StartState(p));
+		p->setState(new WorldState(p));
 		return;
 	}
 }

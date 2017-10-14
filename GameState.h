@@ -62,4 +62,6 @@ public:
 	virtual void run();
 };
 
+extern int timeLeft;
+
 #endif
