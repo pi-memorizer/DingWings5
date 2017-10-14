@@ -90,11 +90,6 @@ Player::Player(int id) : Entity(nullptr,-0,0)
 	height = 16;
 	texture = createTexture(WIDTH, HEIGHT);
 	pushState(new WorldState(this));
-	for (int i = 0; i < INVENTORY_SLOTS; i++)
-	{
-		inventory[i].item = nullptr;
-		inventory[i].number = 0;
-	}
 	cameraLocked = false;
 	cameraX = 0;
 	cameraY = 64;
@@ -162,77 +157,6 @@ void Player::run()
 
 }
 
-bool Player::hasItem(Item *item)
-{
-	for (int i = 0; i < INVENTORY_SLOTS; i++)
-	{
-		if (item == inventory[i].item)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-bool Player::hasItem(unsigned long long flag)
-{
-	for (int i = 0; i < INVENTORY_SLOTS; i++)
-	{
-		if (inventory[i].item->containsFlag(flag))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-ItemNumberPair* Player::getItem(Item *item)
-{
-	int start = abs(rand()) % INVENTORY_SLOTS;
-	int i = start;
-	do {
-		if (inventory[i].item == item)
-		{
-			return &inventory[i];
-		}
-		i++;
-		if (i >= INVENTORY_SLOTS)
-		{
-			i = 0;
-		}
-	} while (i != start);
-	return nullptr;
-}
-
-ItemNumberPair* Player::getItem(unsigned long long category)
-{
-	int start = abs(rand()) % INVENTORY_SLOTS;
-	int i = start;
-	do {
-		if (inventory[i].item!=nullptr&&(inventory[i].item->flags&category)== category)
-		{
-			return &inventory[i];
-		}
-		i++;
-		if (i >= INVENTORY_SLOTS)
-		{
-			i = 0;
-		}
-	} while (i != start);
-	return nullptr;
-}
-
-int Player::itemCount(Item *item)
-{
-	int count = 0;
-	for (int i = 0; i < INVENTORY_SLOTS; i++)
-	{
-		if (inventory[i].item == item)
-		{
-			count += inventory[i].number;
-		}
-	}
-	return count;
-}
-
 void Player::lockCamera()
 {
 	cameraLocked = true;
@@ -264,25 +188,5 @@ int Player::getCameraCenterY()
 	}
 	else {
 		return cameraY;
-	}
-}
-
-int Player::getFlag(string s)
-{
-	if (flags.contains(s))
-	{
-		return flags[s];
-	}
-	else return 0;
-}
-
-void Player::setFlag(string s, int v)
-{
-	if (flags.contains(s))
-	{
-		flags[s] = v;
-	}
-	else {
-		flags.add(s, v);
 	}
 }

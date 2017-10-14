@@ -5,7 +5,6 @@
 #include "Item.h"
 #include "Event.h"
 #include "Animation.h"
-#include "PhraseBattle.h"
 #include <cmath>
 
 
@@ -551,171 +550,6 @@ int bNumberPane(Player *p, string msg, int start, int min, int max)
 	return output;
 }
 
-class InventoryDialogue : public GameState
-{
-	int pointerX, pointerY;
-	static int positionPairs[];
-	static Sprite *inventoryUI, *inventoryPointer, *inventoryBadSpot;
-	Item **output;
-	int moveToNearest();
-	unsigned long long categories;
-public:
-	InventoryDialogue(Player *p, unsigned long long categories, Item**output);
-	virtual void run();
-	virtual void draw();
-};
-
-Sprite *InventoryDialogue::inventoryUI = nullptr;
-Sprite *InventoryDialogue::inventoryPointer = nullptr;
-Sprite *InventoryDialogue::inventoryBadSpot = nullptr;
-
-int InventoryDialogue::positionPairs[2*INVENTORY_SLOTS] = {
-	21,15,
-	117,28,
-	64,90
-};
-
-InventoryDialogue::InventoryDialogue(Player *p, unsigned long long categories, Item **output) : GameState(p)
-{
-	this->categories = categories;
-	this->output = output;
-}
-
-void InventoryDialogue::run()
-{
-	int index = 0;
-	const int MOVE_AMOUNT = 100;
-	startMenu();
-	if (getKey(p,KEY_A) && !a)
-	{
-		if (p->inventory[index].item != nullptr)
-		{
-			if (categories == (p->inventory[index].item->flags&categories))
-			{
-				*output = p->inventory[index].item;
-				p->popState();
-				return;
-			}
-		}
-		else {
-			*output = nullptr;
-			p->popState();
-			return;
-		}
-	}
-	if (getKey(p,KEY_B) && !b)
-	{
-		*output = nullptr;
-		p->popState();
-		return;
-	}
-	if (getKey(p,KEY_UP) && !up)
-	{
-		pointerY -= MOVE_AMOUNT;
-	}
-	if (getKey(p,KEY_DOWN) && !down)
-	{
-		pointerY += MOVE_AMOUNT;
-	}
-	if (getKey(p,KEY_LEFT) && !left)
-	{
-		pointerX -= MOVE_AMOUNT;
-	}
-	if (getKey(p,KEY_RIGHT) && !right)
-	{
-		pointerX += MOVE_AMOUNT;
-	}
-	bool found = false;
-	for (int i = 0; i < 2 * INVENTORY_SLOTS; i += 2)
-	{
-		if (pointerX == positionPairs[i] && pointerY == positionPairs[i + 1])
-		{
-			found = true;
-			index = i / 2;
-			break;
-		}
-	}
-	if (!found)
-	{
-		index = moveToNearest();
-	}
-	endMenu();
-}
-
-int InventoryDialogue::moveToNearest()
-{
-	int minD = 999999999;
-	int x = pointerX;
-	int y = pointerY;
-	int index = -1;
-	for (int i = 0; i < 2 * INVENTORY_SLOTS; i += 2)
-	{
-		int _x = positionPairs[i];
-		int _y = positionPairs[i + 1];
-		int d = (_x - pointerX)*(_x - pointerX) + (_y - pointerY)*(_y - pointerY);
-		if (d < minD)
-		{
-			minD = d;
-			x = _x;
-			y = _y;
-			index = i/2;
-		}
-	}
-	pointerX = x;
-	pointerY = y;
-	return index;
-}
-
-void InventoryDialogue::draw()
-{
-	if (inventoryUI == nullptr)
-	{
-		inventoryUI = new Sprite("inventoryUI", 0, 0);
-		inventoryPointer = new Sprite("inventoryPointer", 0, 0);
-		inventoryBadSpot = new Sprite("inventoryBadSpot", 0, 0);
-	}
-	inventoryUI->draw(0, 0);
-	inventoryPointer->draw(pointerX, pointerY);
-	for (int i = 0; i < 2 * INVENTORY_SLOTS; i += 2)
-	{
-		int x = positionPairs[i];
-		int y = positionPairs[i + 1];
-		Item *item = p->inventory[i / 2].item;
-		if (item != nullptr)
-		{
-			Sprite *s = item->sprite;
-			if (s != nullptr)
-			{
-				s->draw(x, y);
-				if (categories != (categories&item->flags))
-				{
-					inventoryBadSpot->draw(x, y);
-				}
-			}
-		}
-	}
-}
-
-Item* bSelectItem(Player *p)
-{
-	return bSelectItem(p,~((unsigned long long)0));
-}
-
-Item* bSelectItem(Player *p, unsigned long long categories)
-{
-	Item *output = nullptr;
-	InventoryDialogue *state = new InventoryDialogue(p, categories, &output);
-	p->pushState(state);
-	while (state == p->getState())
-	{
-		if (!theLoop())
-		{
-			throw ApplicationClosingException();
-		}
-	}
-	return output;
-}
-
 Script::Script(Player *p,GameState*caller) : GameState(p)
 {
 	this->caller = caller;
@@ -811,26 +645,6 @@ int Script::numberPane(string msg, int start, int min, int max)
 	}
 }
 
-Item* Script::selectItem()
-{
-	return selectItem(~(unsigned long long)0);
-}
-
-Item* Script::selectItem(unsigned long long categories)
-{
-	if (currentState == states.length())
-	{
-		states.add(Return(nullptr));
-		InventoryDialogue *i = new InventoryDialogue(p, categories, &states[states.length() - 1].item);
-		p->pushState(i);
-		currentState++;
-		throw 0;
-	}
-	else {
-		return states[currentState++].item;
-	}
-}
-
 void Script::blockingAnimation(Animation *animation)
 {
 	if (currentState == states.length())
@@ -844,20 +658,5 @@ void Script::blockingAnimation(Animation *animation)
 	else {
 		delete animation;
 		currentState++;
-	}
-}
-
-int Script::phraseBattle(Phrase* phrase, int length)
-{
-	if (currentState == states.length())
-	{
-		states.add(Return(0));
-		PhraseBattle *n = new PhraseBattle(p, phrase, length, &states[states.length() - 1].i);
-		p->pushState(n);
-		currentState++;
-		throw 0;
-	}
-	else {
-		return states[currentState++].i;
 	}
 }

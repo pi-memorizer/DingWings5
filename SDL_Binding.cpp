@@ -476,7 +476,7 @@ void startDrawingPlayer(int index)
 		}
 		if (width >= 3* height/2)
 		{
-			doWidescreen = true;
+			//doWidescreen = true;
 		}
 	}
 	if (doWidescreen)

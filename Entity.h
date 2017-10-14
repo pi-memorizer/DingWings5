@@ -11,7 +11,6 @@ class Entity
 public:
 	bool isAlive = true; //entity will be removed once this is false
 	int x, y, width = TILE_SIZE, height = TILE_SIZE; //coordinates and size in pixel coordinates
-	int power = 0;
 
 	//Creates an entity in a given world at the specified coordinates with a certain size and sprite
 	//function pointers pass in are used for run and interact methods, for convenience
@@ -25,29 +24,6 @@ public:
 	World *world = nullptr;
 	virtual void save();
 	virtual void load();
-};
-
-class Tongue : public Entity
-{
-	Player *p;
-	int size = 0;
-	bool retracting = false;
-	void tonguePlacement();
-	List<Entity*> captures;
-public:
-	Tongue(World *world, Player *p);
-	virtual void run();
-	virtual void draw(int x, int y);
-	virtual bool collides(Entity *e);
-};
-
-class CoolGuy : public Entity
-{
-public:
-	CoolGuy(World *world, int x, int y);
-	virtual void run();
-	virtual void draw(int x, int y);
-	virtual bool collides(Entity *e);
 };
 
 #endif

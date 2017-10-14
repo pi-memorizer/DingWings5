@@ -5,8 +5,11 @@
 //Holds data about items
 
 //The different Item categories, expressed with values that are exponents of two (bit flags)
-#define ITEM_FOOD 1
-#define ITEM_FURNITURE 2
+#define ITEM_EYE 1
+#define ITEM_BODY 2
+#define ITEM_LIMB 3
+#define ITEM_MOUTH 4
+#define ITEM_ACCESSORY 5
 
 ///////////////////////////////////////////////////////
 //IMPORTANT IDEA                                     //
@@ -25,14 +28,9 @@
 class Item
 {
 public:
-	string name;
 	Sprite *sprite = nullptr;
-	string displayName;
-	unsigned long long flags;
-	Item(string name);
-	bool containsFlag(unsigned long long flag);
-	Item* _flags(unsigned long long flags);
-	Item* _displayName(string name);
+	int type;
+	Item(int t);
 	Item* _sprite(Sprite *sprite);
 };
 
@@ -43,6 +41,6 @@ public:
 extern Hashmap<string, Item*> items;
 
 //creates an item given a certain name and adds it to the item list
-Item* addItem(string name);
+Item* addItem(string name, int type);
 
 #endif

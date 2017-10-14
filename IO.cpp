@@ -12,10 +12,6 @@ void loadPlayer(File * file, Player *p)
 	p->y = readInt(file);
 	p->flags.clear();
 	int numKeys = readInt(file);
-	for (int i = 0; i < numKeys; i++)
-	{
-		p->setFlag(readString(file), readInt(file));
-	}
 }
 
 void savePlayer(File *file, Player *p)
@@ -26,11 +22,6 @@ void savePlayer(File *file, Player *p)
 	writeInt(file, p->y);
 	List<string> keys = p->flags.keys();
 	writeInt(file, keys.length());
-	for (int i = 0; i < keys.length(); i++)
-	{
-		writeString(file, keys[i]);
-		writeInt(file, flags[keys[i]]);
-	}
 }
 
 void save()

@@ -56,10 +56,7 @@ public:
 	void textBox(string s, bool skippable); //scripting textbox
 	string optionPane(string msg, string choice1, string choice2); //gives you options between two strings, returning the choice made
 	int numberPane(string msg, int start, int min, int max); //lets the player choose a number within a range, returning that number
-	Item* selectItem(); //Selects an item from the inventory, regardless of category
-	Item* selectItem(unsigned long long categories); //Selects an item from the inventory if it is part of the given categories, return the Item chosen
 	void blockingAnimation(Animation *animation); //runs a blocking animation
-	int phraseBattle(Phrase*, int length);
 };
 
 /////////////////////////////////////
@@ -78,8 +75,6 @@ string bOptionPane(Player *p, string msg, string choice1, string choice2, string
 string bOptionPane(Player *p, string msg, string choice1, string choice2, string choice3, string choice4, string choice5, string choice6, string choice7);
 string bOptionPane(Player *p, string msg, string choice1, string choice2, string choice3, string choice4, string choice5, string choice6, string choice7, string choice8);
 int bNumberPane(Player *p, string msg, int start, int min, int max);
-Item *bSelectItem(Player *p);
-Item *bSelectItem(Player *p, unsigned long long categories);
 
 
 //Special exception type to be thrown if the application needs to close during a blocked call

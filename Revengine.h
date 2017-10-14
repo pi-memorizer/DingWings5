@@ -22,8 +22,8 @@ using namespace std;
 #endif
 
 //the resolution of the game (different from resolution of the screen)
-#define WIDTH 320
-#define HEIGHT 224
+#define WIDTH 512
+#define HEIGHT 352
 
 //the size of map tiles
 #define TILE_SIZE 32

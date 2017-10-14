@@ -2,27 +2,9 @@
 
 Hashmap<string, Item*> items;
 
-Item::Item(string name)
+Item::Item(int t)
 {
-	this->name = name;
-	this->displayName = name;
-}
-
-bool Item::containsFlag(unsigned long long flag)
-{
-	return (flag & flags)!=0;
-}
-
-Item* Item::_flags(unsigned long long flags)
-{
-	flags |= flags;
-	return this;
-}
-
-Item* Item::_displayName(string name)
-{
-	displayName = name;
-	return this;
+	this->type = t;
 }
 
 Item* Item::_sprite(Sprite *s)
@@ -31,7 +13,7 @@ Item* Item::_sprite(Sprite *s)
 	return this;
 }
 
-Item * addItem(string name)
+Item * addItem(string name, int type)
 {
 	if (items.contains(name))
 	{
@@ -39,7 +21,7 @@ Item * addItem(string name)
 		return items[name];
 	}
 	else {
-		Item *i = new Item(name);
+		Item *i = new Item(type);
 		items.add(name, i);
 		return i;
 	}
