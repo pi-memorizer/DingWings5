@@ -64,5 +64,6 @@ extern PackageDeal packages[5];
 extern PackageDeal heldItem;
 
 extern Item* childrenChoices[4];
+extern int itemTimes[4];
 
 #endif

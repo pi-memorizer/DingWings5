@@ -3,6 +3,11 @@
 
 #include "Revengine.h"
 
+#define MAX_TIME_LEFT (-1)
+#define SWITCH_TIME (60*20)
+#define ITEM_TIME (60*40)
+#define MAX_LIVES 3
+
 class Animation;
 
 //GameState superclass for the game state stack
@@ -55,13 +60,18 @@ public:
 
 class SwitchState : public GameState
 {
+private:
+	GameState * caller;
 public:
 	int time = 0;
-	SwitchState(Player *player);
+	SwitchState(Player *player, GameState * caller);
 	virtual void draw();
 	virtual void run();
 };
 
 extern int timeLeft;
+extern int lives;
+extern Sprite *titleGreen;
+extern Sprite *titleRed;
 
 #endif

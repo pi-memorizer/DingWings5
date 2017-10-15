@@ -9,6 +9,7 @@ Player **players = new Player*[0];
 int numPlayers = 0;
 Sprite **guy = nullptr;
 bool inPlayState = false;
+int score = 0;
 
 Player *getPlayer(int id)
 {
@@ -178,15 +179,7 @@ void Player::draw(int x, int y)
 		}
 	}
 	else {
-		if (this->y == 2)
-		{
-			if(this->x == 1)
-			getSprite()->draw(WIDTH - TILE_SIZE, HEIGHT - 2*TILE_SIZE);
-			else getSprite()->draw(WIDTH / 2, HEIGHT - 2 * TILE_SIZE);
-		}
-		else {
-			getSprite()->draw(TILE_SIZE*(8 + 6 * this->x), TILE_SIZE * (1 + 6 * this->y));
-		}
+		
 	}
 }
 

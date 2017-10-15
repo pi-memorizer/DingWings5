@@ -9,8 +9,8 @@
 #include "Shader.h"
 #include "Item.h"
 
-#define MAX_TIME_LEFT -1
 int timeLeft = MAX_TIME_LEFT;
+int lives = MAX_LIVES;
 
 GameState::GameState(Player *player)
 {
@@ -50,6 +50,9 @@ WorldState::WorldState(Player *player) : GameState(player)
 			itemPools[i].push(list[index]);
 		}
 	}
+	score = 0;
+	for (int i = 0; i < 4; i++) itemTimes[i] = ITEM_TIME * 3 / 2 - ITEM_TIME*(rand() % 100) / 100;
+	lives = MAX_LIVES;
 }
 
 void WorldState::draw()
@@ -71,15 +74,7 @@ void WorldState::draw()
 		}
 	}
 	List<Entity*> &entities = worlds[p->getWorldID()]->entities;
-	for (int i = 0; i < entities.length(); i++)
-	{
-		Entity *e = entities[i];
-		assert(e != nullptr);
-		if (e->isAlive)
-		{
-			e->draw(getOnscreenX(p, e->x), getOnscreenY(p, e->y));
-		}
-	}
+
 	for (int i = 0; i < numPlayers; i++)
 	{
 		if (p->getWorldID() == players[i]->getWorldID()) players[i]->draw(getOnscreenX(p, players[i]->x), getOnscreenY(p, players[i]->y));
@@ -91,6 +86,22 @@ void WorldState::draw()
 			int index = world->getUpper(safeDiv(i, TILE_SIZE), safeDiv(j, TILE_SIZE));
 			if (tileset[index] != nullptr&&index != 0) tileset[index]->draw(getOnscreenX(p, safeDiv(i, TILE_SIZE)*TILE_SIZE), getOnscreenY(p, safeDiv(j, TILE_SIZE)*TILE_SIZE));
 		}
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		if (itemTimes[i] >= ITEM_TIME)
+			setDrawColor(0, 0, 255, 255);
+		else
+			setDrawColor(0, 255, 0, 255);
+		Rect r;
+		r.x = 2 * TILE_SIZE+2+i*TILE_SIZE;
+		r.y = TILE_SIZE+2;
+		r.h = 2;
+		int w = itemTimes[i] * 28 / ITEM_TIME;
+		if (w > 28) w = 28;
+		if (w < 0) w = 0;
+		r.w = w;
+		fillRect(&r);
 	}
 	worlds[p->getWorldID()]->draw(p);
 }
@@ -106,6 +117,16 @@ void attemptMove(Player *p, int dx, int dy, int speed)
 			p->x -= dx;
 			p->y -= dy;
 			break;
+		}
+		List<Entity*> list = worlds[p->getWorldID()]->entities;
+		for (int i = 0; i < list.length(); i++)
+		{
+			if (list[i]->collides(p))
+			{
+				p->x -= dx;
+				p->y -= dy;
+				break;
+			}
 		}
 	}
 }
@@ -131,19 +152,27 @@ void WorldState::run()
 {
 	if (p->id == 0)
 	{
-		timeLeft--;
-		if (timeLeft == 0)
+		for (int i = 0; i < 4; i++)
 		{
-			bool lose = false;
-			if (lose)
+			itemTimes[i]--;
+			if (itemTimes[i] == 0)
 			{
-				p->setState(new LoseState(p));
-				return;
+				childrenChoices[i] = nullptr;
+				score -= 20;
+				itemTimes[i] = ITEM_TIME * 3 / 2 - ITEM_TIME*((rand() % 100) / 100);
+				lives--;
+				if (lives == 0)
+				{
+					p->setState(new LoseState(p));
+					return;
+				}
 			}
-			else {
-				p->setState(new WinState(p));
-				return;
-			}
+		}
+		timeLeft--;
+		if (timeLeft%SWITCH_TIME == 0&&timeLeft!=0)
+		{
+			p->pushState(new SwitchState(p,this));
+			return;
 		}
 	}
 	for (int i = 0; i < animations.length(); i++)
@@ -334,6 +363,11 @@ void WorldState::run()
 		}
 	}
 	p->run();
+	if (lives == 0)
+	{
+		p->setState(new LoseState(p));
+		return;
+	}
 	if (firstWithWorldId(p->getWorldID(), p->id))
 	{
 		worlds[p->getWorldID()]->run();
@@ -356,11 +390,13 @@ void WorldState::run()
 
 StartState::StartState(Player *player) : GameState(player)
 {
-
 }
 void StartState::draw()
 {
-
+	if ((frames / 30) % 2 == 0)
+		titleGreen->draw(0, 0);
+	else
+		titleRed->draw(0, 0);
 }
 void StartState::run()
 {
@@ -396,7 +432,7 @@ void WinState::run()
 	}
 	if (down == 2)
 	{
-		p->setState(new WorldState(p));
+		p->popState();
 		return;
 	}
 }
@@ -424,13 +460,33 @@ void LoseState::run()
 	}
 }
 
-SwitchState::SwitchState(Player *player) : GameState(player)
+SwitchState::SwitchState(Player *player, GameState * caller) : GameState(player)
 {
 	inPlayState = false;
+	this->caller = caller;
+	Player *other = players[0] == p ? players[1] : players[0];
+	if (p->building)
+	{
+		p->building = false;
+		other->building = true;
+	}
+	else {
+		p->building = true;
+		other->building = false;
+	}
+	int x = p->x;
+	int y = p->y;
+	p->x = other->x;
+	p->y = other->y;
+	other->x = x;
+	other->y = y;
 }
 void SwitchState::draw()
 {
-
+	caller->draw();
+	string s = "Switch!";
+	for (int i = 0; i < s.length(); i++)
+		tileset[512 + s[i]]->draw(64 + TILE_SIZE*i, 64, TILE_SIZE, TILE_SIZE);
 }
 void SwitchState::run()
 {

@@ -26,4 +26,17 @@ public:
 	virtual void load();
 };
 
+class ButtonEntity : public Entity
+{
+	int value = 0;
+	int sprite;
+	int type;
+public:
+	ButtonEntity(World *world, int x, int y, int sprite, int type);
+	virtual void draw(int x, int y);
+	virtual void run();
+	virtual bool interact(Player *p);
+	virtual bool collides(Entity *e);
+};
+
 #endif

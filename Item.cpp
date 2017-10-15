@@ -1,4 +1,5 @@
 #include "Item.h"
+#include "GameState.h"
 
 Hashmap<string, Item*> items;
 List<Item*> itemPools[4];
@@ -6,6 +7,7 @@ Item* chosenParts[5];
 PackageDeal packages[5];
 PackageDeal heldItem;
 Item* childrenChoices[4] = { nullptr };
+int itemTimes[4] = { -1 };
 
 int PackageDeal::numStuff()
 {

@@ -61,4 +61,6 @@ void removePlayer(int id); //removes a player based on id
 extern int numPlayers; //the number of players currently playing
 extern Player **players; //holds all the players (is a dynamic array of Player pointers)
 
+extern int score;
+
 #endif

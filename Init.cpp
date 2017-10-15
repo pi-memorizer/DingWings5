@@ -11,17 +11,6 @@
 #include "Shader.h"
 #include <ctime>
 
-void addToPool(int type)
-{
-	if (itemPools[type - 1].length() == 9) return;
-	List<Item*> list = items.values();
-	int i = rand() % list.length();
-	while (list[i]->type != type)
-		i = rand() % list.length();
-	itemPools[type - 1].push(list[i]);
-}
-
-
 void testScript(Player*p, int x, int y, Script *s)
 {
 	s->textBox("Hello there", true);
@@ -89,26 +78,6 @@ bool nothing(Player *p, int x, int y) { //interact variant
 		}
 		return true;
 	}
-	if (x == 2 && y == 9)
-	{
-		addToPool(ITEM_EYE);
-		return true;
-	}
-	if (x == 3 && y == 9)
-	{
-		addToPool(ITEM_LIMB);
-		return true;
-	}
-	if (x == 4 && y == 9)
-	{
-		addToPool(ITEM_MOUTH);
-		return true;
-	}
-	if (x == 5 && y == 9)
-	{
-		addToPool(ITEM_ACCESSORY);
-		return true;
-	}
 	if (x == 0 && (y >= 3 && y <= 5))
 	{
 		if (heldItem.wrapping == nullptr)
@@ -134,9 +103,12 @@ bool nothing(Player *p, int x, int y) { //interact variant
 			if (heldItem.wrapping == childrenChoices[x - 2])
 			{
 				//todo add points
+				score += 25;
 			}
 			else {
 				//todo subtract points
+				score -= 10;
+				lives--;
 			}
 		}
 		else {
@@ -147,12 +119,16 @@ bool nothing(Player *p, int x, int y) { //interact variant
 				if (childrenChoices[x - 2] == heldItem.parts[index])
 				{
 					//todo add points
+					score += 25;
 				}
 				else {
 					//todo subtract points
+					score -= 10;
+					lives--;
 				}
 			}
 		}
+		itemTimes[x-2] = ITEM_TIME * 3 / 2 - ITEM_TIME*((rand() % 100) / 100);
 		childrenChoices[x - 2] = nullptr;
 		heldItem = PackageDeal();
 		return true;
@@ -166,6 +142,8 @@ bool nothing(Player *p) //interact entity variant
 void enterNothing(Player *p)
 {
 }
+
+Sprite *liveSprite;
 
 void testWorldLighting(Player *p)
 {
@@ -194,7 +172,10 @@ void testWorldLighting(Player *p)
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		childrenChoices[i]->sprite->draw(TILE_SIZE * (2+i), 0,TILE_SIZE,TILE_SIZE);
+		if(childrenChoices[i]->sprite2!=nullptr)
+			childrenChoices[i]->sprite2->draw(TILE_SIZE * (2 + i), 0, TILE_SIZE, TILE_SIZE);
+		else
+			childrenChoices[i]->sprite->draw(TILE_SIZE * (2+i), 0,TILE_SIZE,TILE_SIZE);
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -205,8 +186,28 @@ void testWorldLighting(Player *p)
 		}
 		tileset[512 + '0' + itemPools[i].length()]->draw(TILE_SIZE*(10 + 3 * (i % 2)), TILE_SIZE*(2 + 5 * (i / 2)), TILE_SIZE, TILE_SIZE);
 	}
-
-
+	{
+		Player *t = players[0]->building ? players[1] : players[0];
+		if (t->y == 2)
+		{
+			if (t->x == 1)
+				tileset[256 + 30]->draw(WIDTH - TILE_SIZE, HEIGHT - 2 * TILE_SIZE);
+			else tileset[256 + 30]->draw(WIDTH / 2, HEIGHT - 2 * TILE_SIZE);
+		}
+		else {
+			tileset[256 + 30]->draw(TILE_SIZE*(9 + 6 * t->x), TILE_SIZE * (2 + 6 * t->y));
+		}
+	}
+	List<Entity*> entities = worlds[p->getWorldID()]->entities;
+	for (int i = 0; i < entities.length(); i++)
+	{
+		Entity *e = entities[i];
+		assert(e != nullptr);
+		if (e->isAlive)
+		{
+			e->draw(getOnscreenX(p, e->x), getOnscreenY(p, e->y));
+		}
+	}
 
 	/*List<Light> lights;
 	lights.add(Light(32.0F, 32.0F, 100.0F, 0.7, 0.7, 0.6));
@@ -221,7 +222,20 @@ void testWorldLighting(Player *p)
 	for (int i = 0; i < lights2.length(); i++) lights2[i].flicker = .035F;
 	sLighting(p, 0.7, 0.7, 0.8, lights2);
 	postProcess(p, WIDTH / 2, 0, WIDTH / 2, HEIGHT - TILE_SIZE);
+
+	string s = to_string(score);
+	for (int i = 0; i < s.length(); i++)
+	{
+		tileset[512 + s[i]]->draw(WIDTH/2-s.length()*8+16*i, HEIGHT - TILE_SIZE, TILE_SIZE/2, TILE_SIZE/2);
+	}
+	if (lives > 0) for (int i = 0; i < lives; i++)
+	{
+		liveSprite->draw((WIDTH - lives * 16) / 2 + i*16, HEIGHT - 16);
+	}
 }
+
+Sprite *titleGreen;
+Sprite *titleRed;
 
 void init()
 {
@@ -256,32 +270,36 @@ void init()
 		catch (int) {
 		}
 	}
+	liveSprite = new Sprite("lives", 0, 0);
+	titleGreen = new Sprite("titleGreen", 0, 0);
+	titleRed = new Sprite("titleRed", 0, 0);
 
 	//add entities to worlds and stuff here preferably
 	World *test = new StaticWorld("map", &enterNothing,&checkPools, &testWorldLighting,&nothing);
 	worlds.add(test);
+	for (int i = 1; i <= 4; i++) test->addEntity(new ButtonEntity(test, 32 + 32 * i, 9 * 32, 257 + i, i));
 	//Entity *testEntity = new Entity(test, -4, 9, 32, 32, nullptr, &nothing, &nothing);
 	//test->addEntity(testEntity);
 	addItem("body1",ITEM_BODY)->_sprite(new Sprite("body1",0,0))->_sprite2(tileset[266+16]);
 	addItem("body2", ITEM_BODY)->_sprite(new Sprite("body2", 0, 0))->_sprite2(tileset[267+16]);
 	addItem("body3", ITEM_BODY)->_sprite(new Sprite("body3", 0, 0))->_sprite2(tileset[268+16]);
 	addItem("body4", ITEM_BODY)->_sprite(new Sprite("body4", 0, 0))->_sprite2(tileset[265+16]);
-	addItem("animeeyes", ITEM_EYE)->_sprite(new Sprite("animeeyes", 35, 28));
-	addItem("jimmyrustlereyes", ITEM_EYE)->_sprite(new Sprite("jimmyrustlereyes", 34, 28));
-	addItem("spidereyes", ITEM_EYE)->_sprite(new Sprite("spidereyes", 34, 30));
-	addItem("unibroweyes", ITEM_EYE)->_sprite(new Sprite("unibroweyes", 34, 24));
-	addItem("bow", ITEM_ACCESSORY)->_sprite(new Sprite("bow", 34, 8));
-	addItem("tophat", ITEM_ACCESSORY)->_sprite(new Sprite("tophat", 54, 15));
-	addItem("wizardhat", ITEM_ACCESSORY)->_sprite(new Sprite("wizardhat", 50, 8));
-	addItem("antlers", ITEM_ACCESSORY)->_sprite(new Sprite("antlers", 45, 2));
-	addItem("jimmyrustlermouth", ITEM_MOUTH)->_sprite(new Sprite("jimmyrustlermouth", 35, 40));
-	addItem("moustache", ITEM_MOUTH)->_sprite(new Sprite("moustache", 44, 69));
-	addItem("eldritchhorrormouth", ITEM_MOUTH)->_sprite(new Sprite("eldritchhorrormouth", 48, 66));
-	addItem("lusciouslips", ITEM_MOUTH)->_sprite(new Sprite("lusciouslips", 52, 68));
-	addItem("tentacles", ITEM_LIMB)->_sprite(new Sprite("tentacles", 39, 82));
-	addItem("paws", ITEM_LIMB)->_sprite(new Sprite("paws", 44, 86));
-	addItem("birdlegs", ITEM_LIMB)->_sprite(new Sprite("birdlegs", 49, 98));
-	addItem("shit", ITEM_LIMB)->_sprite(new Sprite("shit", 36, 88));
+	addItem("animeeyes", ITEM_EYE)->_sprite(new Sprite("animeeyes", 35, 28))->_sprite2(tileset[256 + 32+3]);
+	addItem("jimmyrustlereyes", ITEM_EYE)->_sprite(new Sprite("jimmyrustlereyes", 34, 28))->_sprite2(tileset[256+32-1]);
+	addItem("spidereyes", ITEM_EYE)->_sprite(new Sprite("spidereyes", 34, 30))->_sprite2(tileset[256 + 32+2]);
+	addItem("unibroweyes", ITEM_EYE)->_sprite(new Sprite("unibroweyes", 34, 24))->_sprite2(tileset[256 + 32+1]);
+	addItem("bow", ITEM_ACCESSORY)->_sprite(new Sprite("bow", 34, 8))->_sprite2(tileset[256 + 32+4]);
+	addItem("tophat", ITEM_ACCESSORY)->_sprite(new Sprite("tophat", 54-20, 15-16))->_sprite2(tileset[256 + 32+5]);
+	addItem("wizardhat", ITEM_ACCESSORY)->_sprite(new Sprite("wizardhat", 50-16, 8-11))->_sprite2(tileset[256 + 32+6]);
+	addItem("antlers", ITEM_ACCESSORY)->_sprite(new Sprite("antlers", 45-12, 2-12))->_sprite2(tileset[256 + 32+9]);
+	addItem("jimmyrustlermouth", ITEM_MOUTH)->_sprite(new Sprite("jimmyrustlermouth", 35, 40))->_sprite2(tileset[256 + 32+10]);
+	addItem("moustache", ITEM_MOUTH)->_sprite(new Sprite("moustache", 44-10, 69-22))->_sprite2(tileset[256 + 32+11]);
+	addItem("eldritchhorrormouth", ITEM_MOUTH)->_sprite(new Sprite("eldritchhorrormouth", 48, 66))->_sprite2(tileset[256 + 32+12]);
+	addItem("lusciouslips", ITEM_MOUTH)->_sprite(new Sprite("lusciouslips", 52-18, 68-22))->_sprite2(tileset[256 + 32+13]);
+	addItem("tentacles", ITEM_LIMB)->_sprite(new Sprite("tentacles", 39-5, 82-12));
+	addItem("paws", ITEM_LIMB)->_sprite(new Sprite("paws", 44-11, 86-24));
+	addItem("birdlegs", ITEM_LIMB)->_sprite(new Sprite("birdlegs", 49-13, 98-15));
+	addItem("shit", ITEM_LIMB)->_sprite(new Sprite("shit", 36-2, 88-16));
 	addItem("redpaper", ITEM_WRAPPING)->_sprite(tileset[265])->_sprite2(tileset[268]);
 	addItem("greenpaper", ITEM_WRAPPING)->_sprite(tileset[266])->_sprite2(tileset[269]);
 	addItem("bluepaper", ITEM_WRAPPING)->_sprite(tileset[267])->_sprite2(tileset[270]);
